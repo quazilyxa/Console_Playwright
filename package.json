@@ -1,0 +1,17 @@
+{
+  "name": "super-admin-e2e",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for the LYXA Super Admin panel.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen https://test-v2-panel.lyxa.ai/admin/sign-in"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0",
+    "@types/node": "^22.10.0",
+    "dotenv": "^16.4.5"
+  }
+}
