@@ -219,7 +219,7 @@ export class ShopsPage extends AdminBasePage {
     );
     await input.setInputFiles(filePath);
 
-    const uploadOriginal = this.page.getByRole('button', { name: /upload original/i });
+    const uploadOriginal = this.page.getByRole('button', { name: /^finish$/i });
     await expect(uploadOriginal).toBeVisible();
     await uploadOriginal.click();
     await expect(uploadOriginal).toBeHidden();

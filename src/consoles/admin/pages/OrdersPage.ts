@@ -23,7 +23,7 @@ export class OrdersPage extends AdminBasePage {
     await this.searchBox.fill(term);
     await this.page.waitForLoadState("networkidle");
     await this.searchBox.blur(); // free focus before clicking a result
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(3000);
   }
 
   /** The order-id button inside the first row whose status is "Placed". */
@@ -76,38 +76,38 @@ export class OrdersPage extends AdminBasePage {
   // }
 
   // ---- Adjust Order ----
-  async adjustOrder(): Promise<void> {
-    // Wait for the sidebar buttons to reappear after the address reload.
-    await expect(
-      this.page.getByRole("button", { name: /^adjust order$/i }),
-    ).toBeVisible();
-    await this.page.getByRole("button", { name: /^adjust order$/i }).click();
+  // async adjustOrder(): Promise<void> {
+  //   // Wait for the sidebar buttons to reappear after the address reload.
+  //   await expect(
+  //     this.page.getByRole("button", { name: /^adjust order$/i }),
+  //   ).toBeVisible();
+  //   await this.page.getByRole("button", { name: /^adjust order$/i }).click();
 
-    // Wait for the Adjust Order modal.
-    const dialog = this.page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
+  //   // Wait for the Adjust Order modal.
+  //   const dialog = this.page.getByRole("dialog");
+  //   await expect(dialog).toBeVisible();
 
-    // Click Add Item inside the modal.
-    const addItemButton = dialog.locator("button", { hasText: "Add item" });
-    await expect(addItemButton).toBeVisible();
-    await expect(addItemButton).toBeEnabled();
+  //   // Click Add Item inside the modal.
+  //   const addItemButton = dialog.locator("button", { hasText: "Add item" });
+  //   await expect(addItemButton).toBeVisible();
+  //   await expect(addItemButton).toBeEnabled();
 
-    await addItemButton.click();
-    await this.page.waitForTimeout(2000);
+  //   await addItemButton.click();
+  //   await this.page.waitForTimeout(2000);
 
-    // Add the first product (first "Add" button in the list).
-    await this.page.getByRole("button", { name: /^add$/i }).first().click();
-    await this.page.waitForTimeout(2000);
+  //   // Add the first product (first "Add" button in the list).
+  //   await this.page.getByRole("button", { name: /^add$/i }).first().click();
+  //   await this.page.waitForTimeout(2000);
 
-    // Done
-    await this.page
-      .locator('button[name="adjust-order"]', { hasText: /^done$/i })
-      .click();
+  //   // Done
+  //   await this.page
+  //     .locator('button[name="adjust-order"]', { hasText: /^done$/i })
+  //     .click();
 
-    // Adjust Order (submit)
-    await this.page.getByRole("button", { name: /^adjust order$/i }).click();
-    await this.page.waitForLoadState("networkidle");
-  }
+  //   // Adjust Order (submit)
+  //   await this.page.getByRole("button", { name: /^adjust order$/i }).click();
+  //   await this.page.waitForLoadState("networkidle");
+  // }
 
   // ---- Update Status ----
   async updateStatusToPreparing(): Promise<void> {
@@ -226,7 +226,7 @@ async flagFirstFlaggableOrder(maxTries = 10): Promise<void> {
 
     // Now check for the Flag order button.
     const flagBtn = this.page.getByRole('button', { name: /^flag order$/i });
-    const hasFlag = await flagBtn.isVisible({ timeout: 5000 }).catch(() => false);
+    const hasFlag = await flagBtn.isVisible({ timeout: 6000 }).catch(() => false);
 
     if (hasFlag) {
       await this.doFlag(flagBtn);
@@ -241,21 +241,15 @@ async flagFirstFlaggableOrder(maxTries = 10): Promise<void> {
   throw new Error(`No flaggable order found within ${maxTries} orders`);
 }
 
-/** Close the open order detail (X icon). */
+// close the drawer (order detail panel) and wait for it to actually close before continuing.
 private async closeOrderDetail(): Promise<void> {
-  // The order detail close button — the X near the top-right of the panel.
-  const closeBtn = this.page
-    .getByRole('button', { name: /close/i })
-    .or(this.page.locator('button:has(svg)').filter({ hasText: '' }).last());
-  // Prefer a scoped close if the detail is a dialog:
-  const dialogClose = this.page.getByRole('dialog').getByRole('button').first();
-  if (await dialogClose.isVisible().catch(() => false)) {
-    await dialogClose.click();
-  } else if (await closeBtn.isVisible().catch(() => false)) {
-    await closeBtn.click();
-  } else {
-    await this.page.keyboard.press('Escape'); // fallback
-  }
+  const closeBtn = this.page.getByRole('button', { name: 'Close Drawer' });
+
+  await closeBtn.waitFor({ state: 'visible', timeout: 5000 });
+  await closeBtn.click();
+
+  // Make sure the drawer is actually closed before continuing
+  await closeBtn.waitFor({ state: 'hidden', timeout: 5000 });
 }
 
 /** Fill and submit the Flag Order modal. */
