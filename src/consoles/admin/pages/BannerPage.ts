@@ -208,18 +208,6 @@ export class DisplayPage extends AdminBasePage {
     await this.waitForList();
   }
 
-  /** Clicks the row's Active/Inactive toggle switch (after a search). */
-  async toggleStatus(): Promise<void> {
-    await this.page.getByRole('switch').first().click();
-    await this.waitForList();
-  }
-
-  /** Toolbar Status filter (Active / Inactive). */
-  async filterByStatus(status: 'Active' | 'Inactive'): Promise<void> {
-    await this.selectMuiSelectByLabel('Status', status);
-    await this.waitForList();
-  }
-
   /* ------------------------------------------------------------------ *
    * Delete
    * ------------------------------------------------------------------ */
@@ -311,4 +299,10 @@ export class DisplayPage extends AdminBasePage {
     await this.page.waitForTimeout(2000);
     await expect(this.page.getByRole('progressbar')).toHaveCount(0);
   }
+
+  private async blurSearch(): Promise<void> {
+  await this.searchInput.evaluate((el) => {
+    (el as HTMLInputElement).blur();
+  });
+}
 }
