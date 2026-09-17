@@ -109,7 +109,7 @@ export class DisplayPage extends AdminBasePage {
 
     // Schedule: start = today, end = today + 7 days.
      const start = new Date();
-    start.setDate(start.getDate() + 1);   // one day ahead of today
+    start.setDate(start.getDate());   // one day ahead of today
 
     const end = new Date(start);
     end.setDate(start.getDate() + 7);     // 7 days after start
@@ -118,7 +118,7 @@ export class DisplayPage extends AdminBasePage {
     await this.pickScheduleDate(1, end);
 
     await this.uploadImage(PHOTO_PATH);
-    await this.page.waitForTimeout(5000);
+    await this.page.waitForTimeout(6000);
     // Submit (distinct from the toolbar "Add" that opened the form).
     await this.page.locator('button[type="submit"]').filter({ hasText: /^Add$/ }).click();
     await this.waitForList();
@@ -134,7 +134,7 @@ export class DisplayPage extends AdminBasePage {
       .first()
       .setInputFiles(filePath);
 
-    const uploadOriginal = this.page.getByRole('button', { name: /upload original/i });
+    const uploadOriginal = this.page.getByRole('button', { name: /^finish$/i });  
     await expect(uploadOriginal).toBeVisible();
     await uploadOriginal.click();
     await expect(uploadOriginal).toBeHidden();
@@ -205,18 +205,6 @@ export class DisplayPage extends AdminBasePage {
     await this.selectMuiSelectByLabel('Screen', screen);
 
     await this.page.getByRole('button', { name: 'Save Changes' }).click();
-    await this.waitForList();
-  }
-
-  /** Clicks the row's Active/Inactive toggle switch (after a search). */
-  async toggleStatus(): Promise<void> {
-    await this.page.getByRole('switch').first().click();
-    await this.waitForList();
-  }
-
-  /** Toolbar Status filter (Active / Inactive). */
-  async filterByStatus(status: 'Active' | 'Inactive'): Promise<void> {
-    await this.selectMuiSelectByLabel('Status', status);
     await this.waitForList();
   }
 
@@ -311,4 +299,10 @@ export class DisplayPage extends AdminBasePage {
     await this.page.waitForTimeout(2000);
     await expect(this.page.getByRole('progressbar')).toHaveCount(0);
   }
+
+  private async blurSearch(): Promise<void> {
+  await this.searchInput.evaluate((el) => {
+    (el as HTMLInputElement).blur();
+  });
+}
 }

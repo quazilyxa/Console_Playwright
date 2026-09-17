@@ -59,6 +59,8 @@ export class RidersPage extends AdminBasePage {
     return this.page.getByRole('button', { name: 'Save Changes' });
   }
 
+
+
   /* ------------------------------------------------------------------ *
    * Tabs
    * ------------------------------------------------------------------ */
@@ -158,7 +160,7 @@ export class RidersPage extends AdminBasePage {
     );
     await input.setInputFiles(filePath);
 
-    const uploadOriginal = this.page.getByRole('button', { name: /upload original/i });
+    const uploadOriginal = this.page.getByRole('button', { name: /^finish$/i });
     await expect(uploadOriginal).toBeVisible();
     await uploadOriginal.click();
     await expect(uploadOriginal).toBeHidden();
@@ -178,10 +180,36 @@ export class RidersPage extends AdminBasePage {
   }
 
   /** Opens the ⋮ actions menu on the search-result row for `name`. */
+  // private async openRowActions(name: string): Promise<void> {
+  //   const row = this.page.getByRole('row').filter({ hasText: name }).first();
+  //   await row.getByRole('button').last().click();
+  //   await expect(this.page.getByRole('menu')).toBeVisible();
+  // }
+  /** Opens the ⋮ actions menu on the search-result row for `name`. */
+
   private async openRowActions(name: string): Promise<void> {
-    const row = this.page.getByRole('row').filter({ hasText: name }).first();
-    await row.getByRole('button').last().click();
-    await expect(this.page.getByRole('menu')).toBeVisible();
+    const row = this.page
+      .getByRole('row')
+      .filter({ hasText: name })
+      .first();
+
+    await expect(row).toBeVisible({ timeout: 10000 });
+
+    // Target the actual vertical three-dot icon
+    const actionButton = row.locator(
+      'button:has(svg path[d*="M10 6a2 2"])'
+    );
+
+    await expect(actionButton).toBeVisible({ timeout: 5000 });
+
+    // Scroll it into view
+    await actionButton.scrollIntoViewIfNeeded();
+
+    // Click the center of the actual button
+    await actionButton.click({ position: { x: 20, y: 20 } });
+
+    // Small wait for MUI popover/menu to render
+    await this.page.waitForTimeout(300);
   }
 
   /* ------------------------------------------------------------------ *
@@ -207,6 +235,29 @@ export class RidersPage extends AdminBasePage {
     await this.waitForList();
   }
 
+    async filterByStatus(status: 'Active' | 'Inactive'): Promise<void> {
+    const statusInput = this.page.locator('#input-autocomplete-status');
+
+    await expect(statusInput).toBeVisible({ timeout: 10000 });
+
+    // Open Status dropdown
+    await statusInput.click();
+
+    // Select the requested status
+    const option = this.page.getByRole('option', {
+      name: status,
+      exact: true,
+    });
+
+    await expect(option).toBeVisible({ timeout: 5000 });
+    await option.click();
+
+    // Verify the selected value
+    await expect(statusInput).toHaveValue(status);
+
+    // Wait for filtered results
+    await this.waitForList();
+  }
   /* ------------------------------------------------------------------ *
    * Delete
    * ------------------------------------------------------------------ */

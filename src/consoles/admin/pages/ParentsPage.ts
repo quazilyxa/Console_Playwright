@@ -162,7 +162,7 @@ export class ParentsPage extends AdminBasePage {
     ]);
     await chooser.setFiles(filePath);
 
-    const uploadOriginal = this.page.getByRole('button', { name: /upload original/i });
+    const uploadOriginal = this.page.getByRole('button', { name: /^finish$/i });
     await expect(uploadOriginal).toBeVisible();
     await uploadOriginal.click();
 
