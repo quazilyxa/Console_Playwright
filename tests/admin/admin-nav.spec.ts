@@ -810,27 +810,16 @@ test.describe('Super Admin — Navigation', () => {
 //     // Marketing
 //     // ==========================================================
 
-//     await visit('Marketing', async () => {
-//       await admin.sidebar.goTo('Marketing');
-//       await admin.marketing.expectLoaded();
-//     });
+    // ==========================================================
+    // VERDICT
+    // ==========================================================
 
-//     // ==========================================================
-//     // VERDICT
-//     // ==========================================================
+    if (failures.length > 0) {
+      const report = failures
+        .map((failure) => `  • ${failure.page}: ${failure.error}`)
+        .join('\n');
 
-//     if (failures.length > 0) {
-//       const report = failures
-//         .map(
-//           (failure) =>
-//             `  • ${failure.page}: ${failure.error}`,
-//         )
-//         .join('\n');
-
-//       expect(
-//         failures.length,
-//         `Completed with problems:\n${report}`,
-//       ).toBe(0);
-//     }
-//   });
-// });
+      expect(failures.length, `Completed with problems:\n${report}`).toBe(0);
+    }
+  });
+});

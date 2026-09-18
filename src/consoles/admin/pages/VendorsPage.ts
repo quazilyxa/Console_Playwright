@@ -73,9 +73,9 @@ export class VendorsPage extends AdminBasePage {
   }
 
 
-    private get addVendorButton(): Locator {
+  private get addVendorButton(): Locator {
     return this.page.getByRole('button', { name: 'Add Vendor', exact: true });
-    }
+  }
 
   // ==========================================================
   // Create Vendor (Full Wizard)
@@ -226,15 +226,15 @@ export class VendorsPage extends AdminBasePage {
   }
 
 
-    private async selectFromAutocomplete(
+  private async selectFromAutocomplete(
     labelSuffix: string,
     exactOptionText?: string
-    ): Promise<string> {
+  ): Promise<string> {
     const scope = `selectFromAutocomplete(${labelSuffix})`;
     log(scope, 'START');
 
     const input = this.page.locator(
-        `input[role="combobox"][placeholder="Select ${labelSuffix}"]`
+      `input[role="combobox"][placeholder="Select ${labelSuffix}"]`
     );
 
     await expect(input).toBeVisible();
@@ -244,15 +244,15 @@ export class VendorsPage extends AdminBasePage {
     let opened = await listbox.isVisible().catch(() => false);
 
     if (!opened) {
-        await input.press('ArrowDown');
-        opened = await listbox
+      await input.press('ArrowDown');
+      opened = await listbox
         .waitFor({ state: 'visible', timeout: 3000 })
         .then(() => true)
         .catch(() => false);
     }
 
     if (!opened) {
-        throw new Error(`Could not open dropdown for "${labelSuffix}"`);
+      throw new Error(`Could not open dropdown for "${labelSuffix}"`);
     }
 
     const options = listbox.getByRole('option');
@@ -260,76 +260,76 @@ export class VendorsPage extends AdminBasePage {
     log(scope, `Found ${count} option(s)`);
 
     if (count === 0) {
-        throw new Error(`No options available for "${labelSuffix}"`);
+      throw new Error(`No options available for "${labelSuffix}"`);
     }
 
     let chosenOption: Locator;
     let chosenText: string;
 
     if (exactOptionText) {
-        chosenOption = options.filter({ hasText: exactOptionText }).first();
-        await expect(chosenOption).toBeVisible();
-        chosenText = (await chosenOption.innerText()).trim();
+      chosenOption = options.filter({ hasText: exactOptionText }).first();
+      await expect(chosenOption).toBeVisible();
+      chosenText = (await chosenOption.innerText()).trim();
     } else {
-        const validIndices: number[] = [];
-        for (let i = 0; i < count; i++) {
+      const validIndices: number[] = [];
+      for (let i = 0; i < count; i++) {
         const text = (await options.nth(i).innerText()).trim();
         if (text.length > 0) {
-            validIndices.push(i);
+          validIndices.push(i);
         }
-        }
-        log(scope, `Valid (non-blank) option indices: ${validIndices.join(', ')}`);
+      }
+      log(scope, `Valid (non-blank) option indices: ${validIndices.join(', ')}`);
 
-        if (validIndices.length === 0) {
+      if (validIndices.length === 0) {
         throw new Error(`No non-blank options available for "${labelSuffix}"`);
-        }
+      }
 
-        const randomIndex =
+      const randomIndex =
         validIndices[Math.floor(Math.random() * validIndices.length)];
-        chosenOption = options.nth(randomIndex);
-        chosenText = (await chosenOption.innerText()).trim();
+      chosenOption = options.nth(randomIndex);
+      chosenText = (await chosenOption.innerText()).trim();
     }
 
     log(scope, `Selecting option: "${chosenText}"`);
     await chosenOption.click();
 
     if (exactOptionText) {
-        // Multi-select (chip-based, e.g. Zones) — dropdown stays open after pick
-        log(scope, 'Pressing Escape to close multi-select dropdown...');
-        await this.page.keyboard.press('Escape');
-        await expect(listbox).toBeHidden();
+      // Multi-select (chip-based, e.g. Zones) — dropdown stays open after pick
+      log(scope, 'Pressing Escape to close multi-select dropdown...');
+      await this.page.keyboard.press('Escape');
+      await expect(listbox).toBeHidden();
 
-        // For chip-based fields, verify via the CHIP, not the input value
-        // (input is intentionally cleared after selection in multi-select mode)
-        const chip = this.page.locator('.MuiChip-root').filter({ hasText: chosenText });
-        const chipVisible = await chip.isVisible().catch(() => false);
-        log(scope, `Chip "${chosenText}" visible after selection: ${chipVisible}`);
+      // For chip-based fields, verify via the CHIP, not the input value
+      // (input is intentionally cleared after selection in multi-select mode)
+      const chip = this.page.locator('.MuiChip-root').filter({ hasText: chosenText });
+      const chipVisible = await chip.isVisible().catch(() => false);
+      log(scope, `Chip "${chosenText}" visible after selection: ${chipVisible}`);
 
-        if (!chipVisible) {
+      if (!chipVisible) {
         throw new Error(
-            `"${labelSuffix}" chip for "${chosenText}" not found after selection — value was likely not applied`
+          `"${labelSuffix}" chip for "${chosenText}" not found after selection — value was likely not applied`
         );
-        }
+      }
     } else {
-        // Single-select random pick (e.g. Parent) — dropdown auto-closes on click.
-        // Use Tab instead of Escape to avoid clearing the just-selected value.
-        log(scope, 'Pressing Tab to move focus without clearing selection...');
-        await this.page.keyboard.press('Tab');
+      // Single-select random pick (e.g. Parent) — dropdown auto-closes on click.
+      // Use Tab instead of Escape to avoid clearing the just-selected value.
+      log(scope, 'Pressing Tab to move focus without clearing selection...');
+      await this.page.keyboard.press('Tab');
 
-        // For single-select fields, the chosen text SHOULD remain in the input
-        const finalValue = await input.inputValue();
-        log(scope, `Input value after selection: "${finalValue}"`);
+      // For single-select fields, the chosen text SHOULD remain in the input
+      const finalValue = await input.inputValue();
+      log(scope, `Input value after selection: "${finalValue}"`);
 
-        if (!finalValue || finalValue.trim().length === 0) {
+      if (!finalValue || finalValue.trim().length === 0) {
         throw new Error(
-            `"${labelSuffix}" selection appears empty after picking "${chosenText}" — value was likely cleared`
+          `"${labelSuffix}" selection appears empty after picking "${chosenText}" — value was likely cleared`
         );
-        }
+      }
     }
 
     log(scope, 'DONE', chosenText);
     return chosenText;
-    }
+  }
 
   // ==========================================================
   // Native MuiSelect Helper (Type / Status)
@@ -532,21 +532,181 @@ export class VendorsPage extends AdminBasePage {
     log(scope, 'DONE');
   }
 
-    async clickCreateButton() {
-        const scope = 'clickCreateButton';
-        const createButton = this.page.getByRole('button', { name: /^create$/i });
-        const createVisible = await createButton.isVisible().catch(() => false);
-        log(scope, `Create button visible: ${createVisible}`);
+  async clickCreateButton() {
+    const scope = 'clickCreateButton';
+    const createButton = this.page.getByRole('button', { name: /^create$/i });
+    const createVisible = await createButton.isVisible().catch(() => false);
+    log(scope, `Create button visible: ${createVisible}`);
 
-        if (createVisible) {
-        await createButton.click();
-        }
-        await this.page.waitForTimeout(2000); // Wait for any potential UI updates
-
-        await this.page.waitForLoadState('networkidle');
-        await this.page.waitForTimeout(500);
-        log(scope, 'Create DONE');
+    if (createVisible) {
+      await createButton.click();
     }
+    await this.page.waitForTimeout(2000); // Wait for any potential UI updates
+
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(500);
+    log(scope, 'Create DONE');
+  }
+
+  // ==========================================================
+  // Search
+  // ==========================================================
+
+  private get searchInput(): Locator {
+    return this.page
+      .getByRole('textbox', { name: /search/i })
+      .or(this.page.locator('input[placeholder*="Search" i]'))
+      .or(this.page.locator('input[name="searchValue"]'))
+      .first();
+  }
+
+  async searchVendor(name: string): Promise<void> {
+    const scope = 'searchVendor';
+    log(scope, `START: Searching for "${name}"`);
+    await expect(this.searchInput).toBeVisible({ timeout: 10000 });
+    await this.searchInput.click();
+    await this.searchInput.fill(name);
+    await this.waitForList();
+    await expect(this.page.getByText(name, { exact: true }).first()).toBeVisible({ timeout: 10000 });
+    log(scope, 'DONE: Vendor found in search results');
+  }
+
+  async clearSearch(): Promise<void> {
+    const scope = 'clearSearch';
+    log(scope, 'START');
+    await this.searchInput.click();
+    await this.searchInput.fill('');
+    await this.waitForList();
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // Row Actions (3-dot Kebab Menu)
+  // ==========================================================
+
+  private async openRowActions(name: string): Promise<void> {
+    const scope = 'openRowActions';
+    log(scope, `Opening action menu for "${name}"`);
+
+    // 1. Locate the vendor text cell in the table
+    const vendorCell = this.page.getByText(name, { exact: true }).first();
+    await expect(vendorCell).toBeVisible({ timeout: 15000 });
+
+    // 2. Locate the row container containing this vendor
+    const row = vendorCell.locator('xpath=ancestor::*[@role="row"][1]');
+    const isRowVisible = await row.isVisible().catch(() => false);
+
+    // 3. Find the 3-dot action button in THIS row
+    const actionBtn = isRowVisible
+      ? row.locator('button:has(svg), .MuiIconButton-root, button[aria-haspopup="menu"]').last()
+      : this.page.locator('.MuiButtonBase-root.MuiIconButton-root:has(svg), button:has(svg.iconify--heroicons-solid)').last();
+
+    await actionBtn.scrollIntoViewIfNeeded();
+    await expect(actionBtn).toBeVisible({ timeout: 10000 });
+
+    // 4. Click with force: true to bypass MUI tooltip overlays that block clicks
+    await actionBtn.click({ force: true });
+
+    // 5. Verify menu opened; retry if tooltip intercepted
+    const menu = this.page.getByRole('menu');
+    const menuOpened = await menu
+      .waitFor({ state: 'visible', timeout: 3000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!menuOpened) {
+      log(scope, 'Menu did not open on first click, retrying click...');
+      await actionBtn.click({ force: true });
+      await expect(menu).toBeVisible({ timeout: 5000 });
+    }
+
+    log(scope, 'Action menu opened successfully');
+  }
+
+
+  // ==========================================================
+  // Update Vendor
+  // ==========================================================
+
+  async updateOwnerName(vendorName: string, newOwnerName: string): Promise<void> {
+    const scope = 'updateOwnerName';
+    log(scope, `START: Update owner to "${newOwnerName}" for vendor "${vendorName}"`);
+
+    await this.searchVendor(vendorName);
+    await this.openRowActions(vendorName);
+
+    log(scope, 'Clicking Edit in menu...');
+    await this.page.getByRole('menuitem', { name: 'Edit' }).click({ force: true });
+
+    const ownerInput = this.page
+      .getByRole('textbox', { name: 'Owner Name *' })
+      .or(this.page.locator('input[name="ownerName"]'))
+      .first();
+
+    await expect(ownerInput).toBeVisible({ timeout: 10000 });
+    log(scope, `Filling new owner name: ${newOwnerName}`);
+    await ownerInput.click();
+    await ownerInput.press('ControlOrMeta+a');
+    await ownerInput.fill(newOwnerName);
+
+    log(scope, 'Clicking Save changes...');
+    const saveButton = this.page.getByRole('button', { name: 'Save changes', exact: true });
+    await expect(saveButton).toBeVisible({ timeout: 10000 });
+    await saveButton.click();
+
+    await this.waitForList();
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // Delete Vendor
+  // ==========================================================
+
+  async deleteVendor(vendorName: string): Promise<void> {
+    const scope = 'deleteVendor';
+    log(scope, `START: Delete vendor "${vendorName}"`);
+
+    await this.searchVendor(vendorName);
+    await this.openRowActions(vendorName);
+
+    log(scope, 'Clicking Delete in menu...');
+    await this.page.getByRole('menuitem', { name: 'Delete' }).click({ force: true });
+
+    log(scope, 'Confirming Delete...');
+    const confirmButton = this.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Delete', exact: true })
+      .or(this.page.getByRole('button', { name: 'Delete', exact: true }).last());
+
+    await expect(confirmButton).toBeVisible({ timeout: 10000 });
+    await confirmButton.click();
+
+    await this.waitForList();
+    await this.clearSearch();
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // Assertions
+  // ==========================================================
+
+  async expectVendorVisible(name: string): Promise<void> {
+    const scope = 'expectVendorVisible';
+    log(scope, `Verifying "${name}" is visible...`);
+    await expect(this.page.getByText(name, { exact: true }).first()).toBeVisible({ timeout: 10000 });
+    log(scope, 'CONFIRMED visible');
+  }
+
+  async expectVendorGone(name: string): Promise<void> {
+    const scope = 'expectVendorGone';
+    log(scope, `Verifying "${name}" is deleted / gone...`);
+    await this.searchInput.click();
+    await this.searchInput.fill(name);
+    await this.waitForList();
+    await expect(this.page.getByText(name, { exact: true })).toHaveCount(0);
+    await this.clearSearch();
+    log(scope, 'CONFIRMED gone');
+  }
 
   // ==========================================================
   // Wait (shared)
@@ -564,4 +724,3 @@ export class VendorsPage extends AdminBasePage {
   }
 }
 
-  // Future methods (Add/Search/Edit/Delete vendor) go here
