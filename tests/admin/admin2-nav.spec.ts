@@ -326,25 +326,47 @@ test('navigates Display through Marketing', async ({ admin, step }) => {
   });
 
   // ==========================================================
-  // VENDORS (only active step for now)
+  // VENDORS (Full Lifecycle: Create -> Search -> Edit -> Delete)
   // ==========================================================
 
   let vendor: VendorData | undefined;
 
-  await visit('Vendors — Create', async () => {
+  await visit('Vendors — Lifecycle', async () => {
     await admin.sidebar.goTo('Vendors');
     await admin.vendors.gotoVendors();
 
-    const created = await admin.vendors.createVendor();
-    vendor = created;
+    // 1. Create Vendor
+    await visit('Vendors — Create', async () => {
+      const created = await admin.vendors.createVendor();
+      vendor = created;
+      console.log(`Created vendor: ${created.name}`);
+      console.log(
+        `  Zone: ${created.zone}, Type: ${created.type}, Parent: ${created.parent}`
+      );
+    });
 
-    console.log(`Created vendor: ${created.name}`);
-    console.log(
-      `  Zone: ${created.zone}, Type: ${created.type}, Parent: ${created.parent}`
-    );
+    // 2. Search Newly Added Vendor & Verify Visible
+    await visit('Vendors — Search & Verify', async () => {
+      if (!vendor) throw new Error('Skipped — vendor was never created.');
+      await admin.vendors.searchVendor(vendor.name);
+      await admin.vendors.expectVendorVisible(vendor.name);
+    });
+
+    // 3. Edit Vendor — Change Owner Name & Save
+    await visit('Vendors — Edit Owner Name', async () => {
+      if (!vendor) throw new Error('Skipped — vendor was never created.');
+      const updatedOwner = `Owner-${Date.now().toString().slice(-8)}`;
+      await admin.vendors.updateOwnerName(vendor.name, updatedOwner);
+    });
+
+    // 4. Delete Vendor & Confirm Deletion
+    await visit('Vendors — Delete', async () => {
+      if (!vendor) throw new Error('Skipped — vendor was never created.');
+      await admin.vendors.deleteVendor(vendor.name);
+      await admin.vendors.expectVendorGone(vendor.name);
+    });
   });
 
-  
   // ==========================================================
   // VERDICT
   // ==========================================================
@@ -357,3 +379,4 @@ test('navigates Display through Marketing', async ({ admin, step }) => {
     expect(failures.length, `Completed with problems:\n${report}`).toBe(0);
   }
 });
+
