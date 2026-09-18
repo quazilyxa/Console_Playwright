@@ -17,6 +17,7 @@ export const AdminSelectors = {
     chat: /chat/i,
     marketing: /marketing/i,
     tags: /Tags/i,
+    vendors: /Vendors/i,
   },
 
   // Dashboard top tabs (from the screenshot).

@@ -17,6 +17,7 @@ export const AdminRoutes = {
   chat: '/admin/chat',
   marketing: '/admin/marketing',
   tags: '/display?tab=tags&itemType=food&status=active',
+  vendors: '/admin/vendors',
 } as const;
 
 export type AdminRouteKey = keyof typeof AdminRoutes;

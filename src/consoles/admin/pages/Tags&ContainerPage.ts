@@ -1433,6 +1433,8 @@ export class TagsPage extends AdminBasePage {
     await this.clearSearch();
   }
 
+
+
   // ==========================================================
   // Wait (shared)
   // ==========================================================
@@ -1450,135 +1452,268 @@ export class TagsPage extends AdminBasePage {
 
 
 
+  // ==========================================================
+  // ==========================================================
+  // FILTER CONTAINERS
+  // ==========================================================
+  // ==========================================================
 
+  // ==========================================================
+  // Navigation — Filter Containers
+  // ==========================================================
 
+  async gotoFilterContainers(): Promise<void> {
+    const scope = 'gotoFilterContainers';
+    log(scope, 'START');
 
-// ==========================================================
-// Filter Containers — Navigation & Shuffle
-// ==========================================================
+    const tab = this.page.getByText('Filter Containers', { exact: true });
+    log(scope, 'Waiting for Filter Containers nav link...');
+    await expect(tab).toBeVisible();
+    log(scope, 'Link visible — clicking');
+    await tab.click();
 
-async gotoFilterContainers(): Promise<void> {
-  const scope = 'gotoFilterContainers';
-  log(scope, 'START');
+    log(scope, 'Waiting for "Global Filter Slider" card title...');
+    await expect(
+      this.page.getByText('Global Filter Slider', { exact: true })
+    ).toBeVisible();
+    log(scope, 'Card title visible');
 
-  const tab = this.page.getByRole('tab', { name: 'Filter Containers' });
-  await expect(tab).toBeVisible();
-  await tab.click();
-  await expect(tab).toHaveAttribute('aria-selected', 'true');
-
-  await expect(
-    this.page.getByRole('heading', { name: /Global Filter Slider/i })
-  ).toBeVisible();
-
-  await this.waitForList();
-  log(scope, 'DONE');
-}
-
-async shuffleFirstTwoFilterContainers(): Promise<void> {
-  const scope = 'shuffleFirstTwoFilterContainers';
-  log(scope, 'START');
-
-  // Run once if the swap doesn't visibly work, to find the right row-text selector:
-  // await this.debugInspectDragHandleAncestors(scope);
-
-  await this.dragReorderFirstItemDown(scope);
-
-  await this.waitForList();
-  log(scope, 'DONE');
-}
-
-// ==========================================================
-// User App Sections — Navigation & Shuffle
-// ==========================================================
-
-async gotoUserAppSections(): Promise<void> {
-  const scope = 'gotoUserAppSections';
-  log(scope, 'START');
-
-  const tab = this.page.getByText('User App Sections', { exact: true });
-  await expect(tab).toBeVisible();
-  await tab.click();
-
-  await expect(
-    this.page.getByRole('heading', { name: /User App Sections/i })
-  ).toBeVisible();
-
-  await this.waitForList();
-  log(scope, 'DONE');
-}
-
-async shuffleFirstTwoUserAppSections(): Promise<void> {
-  const scope = 'shuffleFirstTwoUserAppSections';
-  log(scope, 'START');
-
-  // Run once if the swap doesn't visibly work, to find the right row-text selector:
-  // await this.debugInspectDragHandleAncestors(scope);
-
-  await this.dragReorderFirstItemDown(scope);
-
-  await this.waitForList();
-  log(scope, 'DONE');
-}
-private async debugInspectDragHandleAncestors(
-  scopeLabel: string
-): Promise<void> {
-  const scope = scopeLabel;
-  const handle = this.page.locator('button[aria-label="Drag handle"]').first();
-  await expect(handle).toBeVisible();
-
-  const levels = await handle.evaluate((el) => {
-    const results: string[] = [];
-    let node: HTMLElement | null = el as HTMLElement;
-    for (let i = 0; i < 6 && node; i++) {
-      results.push(
-        `Level ${i}: <${node.tagName.toLowerCase()} class="${node.className}"> text="${node.textContent
-          ?.trim()
-          .slice(0, 120)}"`
-      );
-      node = node.parentElement;
-    }
-    return results;
-  });
-
-  levels.forEach((l) => log(scope, l));
-}
-
-// ==========================================================
-// Drag & Drop Reorder (dnd-kit keyboard sensor)
-// ==========================================================
-
-private async dragReorderFirstItemDown(scopeLabel: string): Promise<void> {
-  const scope = scopeLabel;
-  log(scope, 'START');
-
-  const dragHandles = this.page.locator('button[aria-label="Drag handle"]');
-  const count = await dragHandles.count();
-  log(scope, `Found ${count} drag handle(s)`);
-
-  if (count < 2) {
-    throw new Error(
-      `Need at least 2 sortable items to shuffle, found ${count}`
-    );
+    await this.waitForList();
+    log(scope, 'DONE');
   }
 
-  const firstHandle = dragHandles.first();
-  await expect(firstHandle).toBeVisible();
+  // ==========================================================
+  // Row Titles — Filter Containers
+  // ==========================================================
 
-  log(scope, 'Focusing first drag handle...');
-  await firstHandle.focus();
+  private async getFilterContainerRowTitles(): Promise<string[]> {
+    const dragHandles = this.page.locator(
+      'button[aria-label="Drag handle"]'
+    );
+    const count = await dragHandles.count();
 
-  log(scope, 'Pressing Space to pick up item...');
-  await firstHandle.press('Space');
-  await this.page.waitForTimeout(300);
+    const titles: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const title = await dragHandles
+        .nth(i)
+        .locator('xpath=following-sibling::div[1]//h6[1]')
+        .innerText()
+        .catch(() => '(no title)');
+      titles.push(title.trim());
+    }
+    return titles;
+  }
 
-  log(scope, 'Pressing ArrowDown to swap with next item...');
-  await firstHandle.press('ArrowDown');
-  await this.page.waitForTimeout(300);
+  // ==========================================================
+  // Shuffle — Filter Containers
+  // ==========================================================
 
-  log(scope, 'Pressing Space to drop item...');
-  await firstHandle.press('Space');
-  await this.page.waitForTimeout(800);
+  async shuffleFirstTwoFilterContainers(): Promise<void> {
+    const scope = 'shuffleFirstTwoFilterContainers';
+    log(scope, 'START');
 
-  log(scope, 'DONE');
-}
+    await this.dragReorderFirstItemDown(scope, () =>
+      this.getFilterContainerRowTitles()
+    );
+
+    await this.waitForList();
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // ==========================================================
+  // USER APP SECTIONS
+  // ==========================================================
+  // ==========================================================
+
+  // ==========================================================
+  // Navigation — User App Sections
+  // ==========================================================
+
+  async gotoUserAppSections(): Promise<void> {
+    const scope = 'gotoUserAppSections';
+    log(scope, 'START');
+
+    const tab = this.page.getByText('User App Sections', { exact: true });
+    log(scope, 'Waiting for User App Sections nav link...');
+    await expect(tab).toBeVisible();
+    log(scope, 'Link visible — clicking');
+    await tab.click();
+
+    log(scope, 'Waiting for "User App Sections" heading...');
+    await expect(
+      this.page.getByRole('heading', { name: /User App Sections/i })
+    ).toBeVisible();
+    log(scope, 'Heading visible');
+
+    await this.waitForList();
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // Row Titles — User App Sections
+  // ==========================================================
+
+  private async getUserAppSectionRowTitles(): Promise<string[]> {
+    const dragHandles = this.page.locator(
+      'button[aria-label="Drag handle"]'
+    );
+    const count = await dragHandles.count();
+
+    const titles: string[] = [];
+    for (let i = 0; i < count; i++) {
+      // NOTE: adjust this XPath once real row markup is confirmed
+      const title = await dragHandles
+        .nth(i)
+        .locator('xpath=ancestor::tr[1]//td[1]')
+        .innerText()
+        .catch(() => '(no title)');
+      titles.push(title.trim());
+    }
+    return titles;
+  }
+
+  // ==========================================================
+  // Shuffle — User App Sections
+  // ==========================================================
+
+  async shuffleFirstTwoUserAppSections(): Promise<void> {
+    const scope = 'shuffleFirstTwoUserAppSections';
+    log(scope, 'START');
+
+    await this.dragReorderFirstItemDown(scope, () =>
+      this.getUserAppSectionRowTitles()
+    );
+
+    await this.waitForList();
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // Drag & Drop Reorder (dnd-kit keyboard sensor — shared helper)
+  // ==========================================================
+
+  private async dragReorderFirstItemDown(
+    scopeLabel: string,
+    getRowTitles?: () => Promise<string[]>
+  ): Promise<void> {
+    const scope = scopeLabel;
+    log(scope, 'START drag reorder');
+
+    const dragHandles = this.page.locator(
+      'button[aria-label="Drag handle"]'
+    );
+    const count = await dragHandles.count();
+    log(scope, `Found ${count} drag handle(s)`);
+
+    if (count < 2) {
+      throw new Error(
+        `Need at least 2 sortable items to shuffle, found ${count}`
+      );
+    }
+
+    const beforeOrder = getRowTitles ? await getRowTitles() : [];
+    if (getRowTitles) {
+      log(scope, 'BEFORE order:', beforeOrder);
+    }
+
+    const firstHandle = dragHandles.first();
+    await expect(firstHandle).toBeVisible();
+
+    log(scope, 'Focusing first drag handle...');
+    await firstHandle.focus();
+
+    log(scope, 'Pressing Space to pick up item...');
+    await firstHandle.press('Space');
+    await this.page.waitForTimeout(300);
+
+    log(scope, 'Pressing ArrowDown to swap with next item...');
+    await firstHandle.press('ArrowDown');
+    await this.page.waitForTimeout(300);
+
+    log(scope, 'Pressing Space to drop item...');
+    await firstHandle.press('Space');
+    await this.page.waitForTimeout(800);
+
+    if (getRowTitles) {
+      const afterOrder = await getRowTitles();
+      log(scope, 'AFTER order:', afterOrder);
+
+      if (JSON.stringify(beforeOrder) === JSON.stringify(afterOrder)) {
+        log(scope, 'WARNING: Order did NOT change — keyboard drag may have failed');
+        throw new Error('Reorder verification failed — list order unchanged');
+      }
+
+      log(scope, 'Order changed successfully');
+    }
+
+    log(scope, 'DONE drag reorder');
+  }
+
+
+
+    // ==========================================================
+  // ==========================================================
+  // SERVICE SECTION
+  // ==========================================================
+  // ==========================================================
+
+  // ==========================================================
+  // Navigation — Service Section
+  // ==========================================================
+
+  async gotoServiceSection(): Promise<void> {
+    const scope = 'gotoServiceSection';
+    log(scope, 'START');
+
+    const tab = this.page.getByText('Service Section', { exact: true });
+    log(scope, 'Waiting for Service Section nav link...');
+    await expect(tab).toBeVisible();
+    log(scope, 'Link visible — clicking');
+    await tab.click();
+
+    log(scope, 'Waiting for page to settle...');
+    await this.waitForList();
+
+    // TODO: Add heading assertion once confirmed
+    // await expect(
+    //   this.page.getByRole('heading', { name: /Service Section/i })
+    // ).toBeVisible();
+
+    log(scope, 'DONE');
+  }
+
+  // ==========================================================
+  // ==========================================================
+  // APP APPEARANCE
+  // ==========================================================
+  // ==========================================================
+
+  // ==========================================================
+  // Navigation — App Appearance
+  // ==========================================================
+
+  async gotoAppAppearance(): Promise<void> {
+    const scope = 'gotoAppAppearance';
+    log(scope, 'START');
+
+    const tab = this.page.getByText('App Appearance', { exact: true });
+    log(scope, 'Waiting for App Appearance nav link...');
+    await expect(tab).toBeVisible();
+    log(scope, 'Link visible — clicking');
+    await tab.click();
+
+    log(scope, 'Waiting for page to settle...');
+    await this.waitForList();
+
+    // TODO: Add heading assertion once confirmed
+    // await expect(
+    //   this.page.getByRole('heading', { name: /App Appearance/i })
+    // ).toBeVisible();
+
+    log(scope, 'DONE');
+  }
+
+
+
 }
