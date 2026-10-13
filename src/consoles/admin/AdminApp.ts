@@ -14,7 +14,8 @@ import { SettingsPage } from '@/consoles/admin/pages/SettingsPage';
 import { ChatPage } from '@/consoles/admin/pages/ChatPage';
 import { MarketingPage } from '@/consoles/admin/pages/MarketingPage';
 import { TagsPage } from '@/consoles/admin/pages/Tags&ContainerPage';
-import {VendorsPage} from '@/consoles/admin/pages/VendorsPage';
+import { VendorsPage } from '@/consoles/admin/pages/VendorsPage';
+import { ShopMarketingPage } from '@/consoles/admin/pages/ShopMarketingPage';
 
 /** Aggregates every Super Admin page object and shared component. */
 export class AdminApp {
@@ -35,6 +36,7 @@ export class AdminApp {
   readonly chat: ChatPage;
   readonly marketing: MarketingPage;
   readonly vendors: VendorsPage;
+  readonly shopMarketing: ShopMarketingPage;
   constructor(page: Page) {
     this.login = new AdminLoginPage(page);
     this.sidebar = new AdminSidebar(page);
@@ -48,10 +50,10 @@ export class AdminApp {
     this.riders = new RidersPage(page);
     this.financials = new FinancialsPage(page);
     this.team = new TeamPage(page);
-    this.display = new DisplayPage(page);
     this.settings = new SettingsPage(page);
     this.chat = new ChatPage(page);
     this.marketing = new MarketingPage(page);
     this.vendors = new VendorsPage(page);
+    this.shopMarketing = new ShopMarketingPage(page);
   }
 }

@@ -4,7 +4,7 @@
  */
 export const AdminSelectors = {
   headings: {
-    dashboard: /super admin/i,
+    dashboard: /welcome back|general|super admin/i,
     orders: /orders/i,
     parents: /parents/i,
     shops: /shops/i,

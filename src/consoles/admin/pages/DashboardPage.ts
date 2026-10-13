@@ -16,6 +16,24 @@ export class DashboardPage extends AdminBasePage {
 
   private readonly tabs = new TabBar(this.page);
 
+  /** Confirm the dashboard page has loaded and dismiss notifications popup if present. */
+  override async expectLoaded(): Promise<void> {
+    const closeBtn = this.page.getByRole('button', { name: 'Close for now' });
+    if (await closeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await closeBtn.click().catch(() => {});
+    }
+
+    await this.page.waitForLoadState('networkidle');
+    const indicator = this.page
+      .getByText(/welcome back/i)
+      .or(this.page.getByText('LYXA - Super Admin'))
+      .or(this.page.getByRole('heading', { name: /welcome back|general|super admin/i }))
+      .or(this.page.getByRole('tab', { name: 'General' }))
+      .first();
+
+    await expect(indicator).toBeVisible({ timeout: 20_000 });
+  }
+
   /** Switch to a tab on this page by name. */
   async openTab(name: string): Promise<void> {
     await this.tabs.select(name);
