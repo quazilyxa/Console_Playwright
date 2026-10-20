@@ -35,6 +35,12 @@ setup('authenticate admin', async ({ page }) => {
 
   console.log('2. Login page loaded:', page.url());
 
+  const closeBtn = page.getByRole('button', { name: 'Close for now' });
+  if (await closeBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    console.log('Dismissing "Close for now" modal...');
+    await closeBtn.click();
+  }
+
   console.log('3. Filling email...');
   await page.getByLabel('Email address').fill(ENV.admin.email);
 
@@ -43,6 +49,10 @@ setup('authenticate admin', async ({ page }) => {
 
   console.log('5. Clicking Sign In...');
   await page.getByRole('button', { name: /sign ?in|log ?in/i }).click();
+
+  if (await closeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await closeBtn.click();
+  }
 
   console.log('6. Sign In clicked. Current URL:', page.url());
 

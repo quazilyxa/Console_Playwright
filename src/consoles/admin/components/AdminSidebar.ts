@@ -10,9 +10,18 @@ export class AdminSidebar {
 
   /** Open the sidebar drawer if it's collapsed. No-op if already open. */
   private async ensureOpen(): Promise<void> {
+    const closeBtn = this.page.getByRole('button', { name: 'Close for now' });
+    if (await closeBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await closeBtn.click().catch(() => {});
+    }
+
     const toggle = this.page
-      .locator('button[aria-label*="menu" i], button[aria-label*="drawer" i], header button:has(svg)')
-      .first();
+      .getByRole('banner')
+      .getByRole('button')
+      .filter({ hasText: /^$/ })
+      .first()
+      .or(this.page.locator('button[aria-label*="menu" i], button[aria-label*="drawer" i], header button:has(svg)').first());
+
     if (await toggle.isVisible().catch(() => false)) {
       await toggle.click().catch(() => {});
     }

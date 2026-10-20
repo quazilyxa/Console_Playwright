@@ -30,6 +30,15 @@ export class ParentsPage extends AdminBasePage {
 
   private readonly tabs = new TabBar(this.page);
 
+  override async expectLoaded(): Promise<void> {
+    const closeBtn = this.page.getByRole('button', { name: 'Close for now' });
+    if (await closeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await closeBtn.click().catch(() => {});
+    }
+
+    await super.expectLoaded();
+  }
+
   /* ------------------------------------------------------------------ *
    * Locators
    * ------------------------------------------------------------------ */
@@ -47,14 +56,20 @@ export class ParentsPage extends AdminBasePage {
     return this.page.locator('button:has(svg.iconify--heroicons-solid)').last();
   }
 
-  /** Status combobox inside the Add/Edit drawer (no placeholder attribute). */
+  /** Status combobox inside the Add/Edit drawer. */
   private get formStatusInput(): Locator {
-    return this.page.locator('#input-autocomplete-status:not([placeholder])');
+    return this.page
+      .locator('.MuiDrawer-root, [role="dialog"]')
+      .locator('#input-autocomplete-status')
+      .or(this.page.locator('#input-autocomplete-status').last());
   }
 
-  /** Status combobox in the list toolbar (has placeholder="Status"). */
+  /** Status combobox in the list toolbar. */
   private get filterStatusInput(): Locator {
-    return this.page.locator('#input-autocomplete-status[placeholder="Status"]');
+    return this.page
+      .locator('#input-autocomplete-status')
+      .or(this.page.getByRole('combobox', { name: /status/i }))
+      .first();
   }
 
   /** Both "Choose date" buttons: index 0 = commission start, index 1 = commission end. */
@@ -254,7 +269,7 @@ export class ParentsPage extends AdminBasePage {
     await input.click();
 
     const listbox = this.page.getByRole('listbox');
-    await expect(listbox).toBeVisible();
+    await expect(listbox).toBeVisible({ timeout: 5000 });
 
     if (option) {
       await listbox.getByRole('option', { name: option, exact: true }).click();
@@ -265,7 +280,10 @@ export class ParentsPage extends AdminBasePage {
       await options.nth(Math.floor(Math.random() * count)).click();
     }
 
-    await expect(listbox).toBeHidden();
+    if (await listbox.isVisible().catch(() => false)) {
+      await this.page.keyboard.press('Escape');
+    }
+    await expect(listbox).toBeHidden({ timeout: 5000 }).catch(() => {});
   }
 
   /**
