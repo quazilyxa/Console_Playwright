@@ -16,6 +16,8 @@ import { MarketingPage } from '@/consoles/admin/pages/MarketingPage';
 import { TagsPage } from '@/consoles/admin/pages/Tags&ContainerPage';
 import { VendorsPage } from '@/consoles/admin/pages/VendorsPage';
 import { ShopMarketingPage } from '@/consoles/admin/pages/ShopMarketingPage';
+import { CustomisedSection } from '@/consoles/admin/pages/CustomisedSection';
+import { AccessAsShopPage } from '@/consoles/admin/pages/AccessAsShopPage';
 
 /** Aggregates every Super Admin page object and shared component. */
 export class AdminApp {
@@ -37,6 +39,12 @@ export class AdminApp {
   readonly marketing: MarketingPage;
   readonly vendors: VendorsPage;
   readonly shopMarketing: ShopMarketingPage;
+  readonly customisedSection: CustomisedSection;
+  readonly accessAsShop: AccessAsShopPage;
+  get customizedSection(): CustomisedSection {
+    return this.customisedSection;
+  }
+
   constructor(page: Page) {
     this.login = new AdminLoginPage(page);
     this.sidebar = new AdminSidebar(page);
@@ -55,5 +63,7 @@ export class AdminApp {
     this.marketing = new MarketingPage(page);
     this.vendors = new VendorsPage(page);
     this.shopMarketing = new ShopMarketingPage(page);
+    this.customisedSection = new CustomisedSection(page);
+    this.accessAsShop = new AccessAsShopPage(page);
   }
 }

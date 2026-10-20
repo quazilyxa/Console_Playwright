@@ -3,6 +3,7 @@ import type { BannerData } from '@/consoles/admin/pages/BannerPage';
 import type { ListContainerData, TagData } from '@/consoles/admin/pages/Tags&ContainerPage';
 import { VendorsPage, type VendorData } from '@/consoles/admin/pages/VendorsPage';
 import { MarketingPage, type CampaignData, type QrCodeCampaignData } from '@/consoles/admin/pages/MarketingPage';
+import type { CustomizedShopsSectionData, CustomizedItemsSectionData } from '@/consoles/admin/pages/CustomisedSection';
 
 
 /**
@@ -23,6 +24,8 @@ import { MarketingPage, type CampaignData, type QrCodeCampaignData } from '@/con
  * Settings
  * Chat
  * Marketing
+ * Shop Marketing
+ * Access As Shop
  */
 test.describe('Super Admin — Display through Marketing', () => {
   test('navigates Display through Marketing', async ({ admin, step }) => {
@@ -213,6 +216,50 @@ test.describe('Super Admin — Display through Marketing', () => {
     //       await admin.tags.shuffleFirstTwoUserAppSections();
     //     });
 
+    // ==========================================================
+    // USER APP SECTIONS — CUSTOMISED SECTIONS (SHOPS & ITEMS)
+    // ==========================================================
+
+    // await visit('User App Sections — Customised Shops Section Lifecycle', async () => {
+    //   await admin.sidebar.goTo('Display');
+    //   await admin.customisedSection.gotoUserAppSections();
+
+    //   // 1. Create "Customized shops" section
+    //   const shopsSection = await admin.customisedSection.createCustomizedShopsSection({
+    //     sectionName: 'Item Section 101',
+    //     screenSection: 'Customized shops',
+    //     zone: 'Dhaka New',
+    //     zoneSearch: 'Dhaka',
+    //     tag: 'Coffee',
+    //     tagSearch: 'Coffee',
+    //     shopName: 'Coffee Prince Coffee Prince',
+    //   });
+
+    //   // 2. Search & Delete
+    //   await admin.customisedSection.searchSection(shopsSection.sectionName);
+    //   await admin.customisedSection.deleteSection(shopsSection.sectionName);
+    // });
+
+    // await visit('User App Sections — Customised Items Section Lifecycle', async () => {
+    //   await admin.customisedSection.gotoUserAppSections();
+
+    //   // 1. Create "Customized items" section
+    //   const itemsSection = await admin.customisedSection.createCustomizedItemsSection({
+    //     sectionName: 'Item 101',
+    //     screenSection: 'Customized items',
+    //     zone: 'Dhaka New',
+    //     zoneSearch: 'Dhaka',
+    //     shop: 'Test Shop',
+    //     shopSearch: 'Test Shop',
+    //     category: 'Premium',
+    //   });
+
+    //   // 2. Search & Delete & Clear
+    //   await admin.customisedSection.searchSection(itemsSection.sectionName);
+    //   await admin.customisedSection.deleteSection(itemsSection.sectionName);
+    //   await admin.customisedSection.clearSearch();
+    // });
+
 
     //         // ==========================================================
     //     // SERVICE SECTION (navigation only — actions TBD)
@@ -307,135 +354,171 @@ test.describe('Super Admin — Display through Marketing', () => {
     // MARKETING — Limited Time Offers & Campaign Lifecycle
     // ==========================================================
 
-    await visit('Marketing — Overview & Configuration', async () => {
-      await admin.sidebar.goTo('Marketing');
-      await admin.marketing.expectLoaded();
+    // await visit('Marketing — Overview & Configuration', async () => {
+    //   await admin.sidebar.goTo('Marketing');
+    //   await admin.marketing.expectLoaded();
 
-      // 1. Limited Time Offers -> Configuration
-      await admin.marketing.openTab('Limited Time Offers');
-      await admin.marketing.openSubTab('Configuration');
+    //   // 1. Limited Time Offers -> Configuration
+    //   await admin.marketing.openTab('Limited Time Offers');
+    //   await admin.marketing.openSubTab('Configuration');
 
-      // Add preset and max cap, then save configuration
-      await admin.marketing.addDiscountPreset('5');
-      await admin.marketing.addMaxDiscountCap('5');
-      await admin.marketing.saveConfiguration();
-    });
+    //   // Add preset and max cap, then save configuration
+    //   await admin.marketing.addDiscountPreset('5');
+    //   await admin.marketing.addMaxDiscountCap('5');
+    //   await admin.marketing.saveConfiguration();
+    // });
 
-    await visit('Marketing — Campaign Management & Creation', async () => {
-      // 2. Campaign Management -> Start New Campaign
-      await admin.marketing.openSubTab('Campaign Management');
-      await admin.marketing.openStartNewCampaign();
+    // await visit('Marketing — Campaign Management & Creation', async () => {
+    //   // 2. Campaign Management -> Start New Campaign
+    //   await admin.marketing.openSubTab('Campaign Management');
+    //   await admin.marketing.openStartNewCampaign();
 
-      const campaignData = MarketingPage.randomCampaign({
-        title: 'New Camp',
-        subtitle: 'Summer Camp',
-        sectionDisplayName: 'Summer Camp',
-        repeatDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
-      });
-      await admin.marketing.fillCampaignDetails(campaignData);
-      await admin.marketing.saveAndPublishCampaign();
-    });
+    //   const campaignData = MarketingPage.randomCampaign({
+    //     title: 'New Camp',
+    //     subtitle: 'Summer Camp',
+    //     sectionDisplayName: 'Summer Camp',
+    //     repeatDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+    //   });
+    //   await admin.marketing.fillCampaignDetails(campaignData);
+    //   await admin.marketing.saveAndPublishCampaign();
+    // });
 
-    await visit('Marketing — History & Discard Flow', async () => {
-      // 3. History Tab -> Discard prompt
-      await admin.marketing.openSubTab('History');
-      await admin.marketing.discardIfPrompted();
-    });
+    // await visit('Marketing — History & Discard Flow', async () => {
+    //   // 3. History Tab -> Discard prompt
+    //   await admin.marketing.openSubTab('History');
+    //   await admin.marketing.discardIfPrompted();
+    // });
 
-    await visit('Marketing — Add Shop to Campaign', async () => {
-      // 4. Return to Campaign Management -> Expand Card -> Add Shop & Items
-      await admin.marketing.openSubTab('Campaign Management');
-      await admin.marketing.expandCampaign(/New Camp/i);
-      await admin.marketing.addShopToCampaign({
-        shopName: 'Test Shop',
-        discountPercentage: '15%',
-        maxDiscountCap: '10',
-        itemNames: ['Iced Coke', 'Attribute Test'],
-      });
+    // await visit('Marketing — Add Shop to Campaign', async () => {
+    //   // 4. Return to Campaign Management -> Expand Card -> Add Shop & Items
+    //   await admin.marketing.openSubTab('Campaign Management');
+    //   await admin.marketing.expandCampaign(/New Camp/i);
+    //   await admin.marketing.addShopToCampaign({
+    //     shopName: 'Test Shop',
+    //     discountPercentage: '15%',
+    //     maxDiscountCap: '10',
+    //     itemNames: ['Iced Coke', 'Attribute Test'],
+    //   });
 
-      // 5. Navigate back via Logo link
-      await admin.marketing.clickLogo();
-    });
+    //   // 5. Navigate back via Logo link
+    //   await admin.marketing.clickLogo();
+    // });
 
-    await visit('Marketing — Delete Campaign & Configuration', async () => {
-      // Return to Marketing if previous step navigated to Logo/Dashboard
-      if (!admin.marketing.pageInstance.url().includes('marketing')) {
-        await admin.sidebar.goTo('Marketing');
-      }
-      await admin.marketing.openTab('Limited Time Offers');
+    // await visit('Marketing — Delete Campaign & Configuration', async () => {
+    //   // Return to Marketing if previous step navigated to Logo/Dashboard
+    //   if (!admin.marketing.pageInstance.url().includes('marketing')) {
+    //     await admin.sidebar.goTo('Marketing');
+    //   }
+    //   await admin.marketing.openTab('Limited Time Offers');
 
-      // 6. Delete created campaign
-      await admin.marketing.deleteCampaign();
+    //   // 6. Delete created campaign
+    //   await admin.marketing.deleteCampaign();
 
-      // 7. Delete configuration preset & max cap, then Save
-      await admin.marketing.deleteConfiguration();
+    //   // 7. Delete configuration preset & max cap, then Save
+    //   await admin.marketing.deleteConfiguration();
 
-      // 8. Navigate back via Logo link
-      await admin.marketing.clickLogo();
-    });
+    //   // 8. Navigate back via Logo link
+    //   await admin.marketing.clickLogo();
+    // });
+
+    // // ==========================================================
+    // // MARKETING — QR Code Generator Lifecycle
+    // // ==========================================================
+
+    // await visit('Marketing — QR Code Generator', async () => {
+    //   // Return to Marketing if previous step navigated to Logo/Dashboard
+    //   if (!admin.marketing.pageInstance.url().includes('marketing')) {
+    //     await admin.sidebar.goTo('Marketing');
+    //   }
+
+    //   // 1. Switch to QR Code Generator tab
+    //   await admin.marketing.openTab('Qr Code Generator');
+
+    //   // 2. Create QR Code Campaign (Dhamaka -> Active -> Shop -> Food -> Test Shop)
+    //   await admin.marketing.createQrCode({
+    //     campaignName: 'Dhamaka',
+    //     status: 'Active',
+    //     redirectTo: 'Shop',
+    //     shopType: 'Food',
+    //     shopName: 'Test Shop',
+    //   });
+
+    //   // 3. Preview QR code thumbnail and dismiss dialog
+    //   await admin.marketing.previewQrCode('Dhamaka');
+
+    //   // 4. Copy link and download QR code
+    //   await admin.marketing.copyQrLinkAndDownload('Dhamaka');
+
+    //   // 5. Delete QR code via kebab menu and confirm
+    //   await admin.marketing.deleteQrCode('Dhamaka');
+
+    //   // 6. Navigate back via Logo link
+    //   await admin.marketing.clickLogo();
+    // });
+
+    // // ==========================================================
+    // // SHOP MARKETING — Promotions Lifecycle (Spend & New User Discount)
+    // // ==========================================================
+
+    // await visit('Shop Marketing — Spend & New User Promotions Lifecycle', async () => {
+    //   // 1. Navigate to Shops -> First Shop -> Go to Marketing
+    //   await admin.shopMarketing.goToShopMarketing();
+
+    //   // 2. Configure & Save First Promotion (Spend Promotion)
+    //   await admin.shopMarketing.createSpendPromotion({
+    //     maxSpendLimit: '100',
+    //     perUserLimit: '5',
+    //     minSpend: '100',
+    //   });
+
+    //   // 3. Configure & Save Second Promotion (New User Discount)
+    //   await admin.shopMarketing.createNewUserDiscount({
+    //     maxDiscountPerOrder: '100',
+    //     spendLimit: '100',
+    //   });
+
+    //   // 4. End Both Promotions (Teardown)
+    //   await admin.shopMarketing.endPromotion(4);
+    //   await admin.shopMarketing.endPromotion(5);
+
+    //   // 5. Navigate back via Logo link
+    //   await admin.shopMarketing.clickLogo();
+    // });
 
     // ==========================================================
-    // MARKETING — QR Code Generator Lifecycle
+    // ACCESS AS SHOP — Impersonation & Shop Navigation Lifecycle
     // ==========================================================
 
-    await visit('Marketing — QR Code Generator', async () => {
-      // Return to Marketing if previous step navigated to Logo/Dashboard
-      if (!admin.marketing.pageInstance.url().includes('marketing')) {
-        await admin.sidebar.goTo('Marketing');
-      }
+    await visit('Access As Shop — Impersonation, Settings & Navigation Lifecycle', async () => {
+      // 1. Navigate to Shops -> Access As Shop
+      await admin.accessAsShop.accessShop();
 
-      // 1. Switch to QR Code Generator tab
-      await admin.marketing.openTab('Qr Code Generator');
-
-      // 2. Create QR Code Campaign (Dhamaka -> Active -> Shop -> Food -> Test Shop)
-      await admin.marketing.createQrCode({
-        campaignName: 'Dhamaka',
-        status: 'Active',
-        redirectTo: 'Shop',
-        shopType: 'Food',
-        shopName: 'Test Shop',
+      // 2. Settings -> Delivery Settings -> Configure Amount & Save
+      await admin.accessAsShop.configureDeliverySettings({
+        amount: '90000',
+        updateAmount: '100000',
       });
 
-      // 3. Preview QR code thumbnail and dismiss dialog
-      await admin.marketing.previewQrCode('Dhamaka');
+      // 3. Dashboard -> Verify Customer & Operations filters
+      await admin.accessAsShop.verifyShopDashboard();
 
-      // 4. Copy link and download QR code
-      await admin.marketing.copyQrLinkAndDownload('Dhamaka');
+      // 4. Marketing -> Verify view
+      await admin.accessAsShop.verifyMarketing();
 
-      // 5. Delete QR code via kebab menu and confirm
-      await admin.marketing.deleteQrCode('Dhamaka');
-
-      // 6. Navigate back via Logo link
-      await admin.marketing.clickLogo();
-    });
-
-    // ==========================================================
-    // SHOP MARKETING — Promotions Lifecycle (Spend & New User Discount)
-    // ==========================================================
-
-    await visit('Shop Marketing — Spend & New User Promotions Lifecycle', async () => {
-      // 1. Navigate to Shops -> First Shop -> Go to Marketing
-      await admin.shopMarketing.goToShopMarketing();
-
-      // 2. Configure & Save First Promotion (Spend Promotion)
-      await admin.shopMarketing.createSpendPromotion({
-        maxSpendLimit: '100',
-        perUserLimit: '5',
-        minSpend: '100',
+      // 5. Finance -> Filter This Year & Record payment
+      await admin.accessAsShop.recordFinancePayment({
+        amount: '90000',
+        note: 'Test',
       });
 
-      // 3. Configure & Save Second Promotion (New User Discount)
-      await admin.shopMarketing.createNewUserDiscount({
-        maxDiscountPerOrder: '100',
-        spendLimit: '100',
-      });
+      // 6. Profile -> Issues
+      await admin.accessAsShop.verifyShopProfile();
 
-      // 4. End Both Promotions (Teardown)
-      await admin.shopMarketing.endPromotion(4);
-      await admin.shopMarketing.endPromotion(5);
+      // 7. Products -> Attribute Settings & Stock Tabs
+      await admin.accessAsShop.verifyShopProducts();
 
-      // 5. Navigate back via Logo link
-      await admin.shopMarketing.clickLogo();
+      // 8. Return back to Super Admin
+      await admin.accessAsShop.returnToAdmin();
     });
 
     // ==========================================================

@@ -6,7 +6,7 @@ export const AdminSelectors = {
   headings: {
     dashboard: /welcome back|general|super admin/i,
     orders: /orders/i,
-    parents: /parents/i,
+    parents: /parents?(\s+list)?/i,
     shops: /shops/i,
     users: /users/i,
     riders: /riders/i,
@@ -18,6 +18,7 @@ export const AdminSelectors = {
     marketing: /marketing/i,
     tags: /Tags/i,
     vendors: /Vendors/i,
+    customisedSection: /User App Sections|Display/i,
   },
 
   // Dashboard top tabs (from the screenshot).

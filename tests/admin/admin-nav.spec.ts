@@ -401,6 +401,7 @@ test.describe('Super Admin — Navigation', () => {
 
         await admin.parents.deleteParent(parent.name);
         await admin.parents.expectParentGone(parent.name);
+        await admin.parents.filterByStatus('Active');
       });
     });
 
@@ -558,107 +559,75 @@ test.describe('Super Admin — Navigation', () => {
       await admin.team.expectLoaded();
 
       /*
-       * Run the complete member lifecycle for every Team role:
-       *
-       * Create
-       *   ↓
-       * Search
-       *   ↓
-       * Deactivate
-       *   ↓
-       * Filter Inactive
-       *   ↓
-       * Search
-       *   ↓
-       * Verify
-       *   ↓
-       * Delete
-       *   ↓
-       * Verify Gone
-       *   ↓
-       * Reset Active filter
+       * New Team UI member flows:
+       * 1. Multi-role member: Create with multiple non-Super Admin roles
+       *    → Search → Deactivate → Filter Inactive → Delete → Reset Active filter
+       * 2. Standalone Super Admin: Create with Super Admin role (exclusive access)
+       *    → Search → Verify → Delete
        */
-      for (const role of TeamPage.roles) {
-        let member: MemberData | undefined;
+      let multiRoleMember: MemberData | undefined;
 
-        // ------------------------------------------------------
-        // Create Member
-        // ------------------------------------------------------
+      // ------------------------------------------------------
+      // 1. Create Multi-Role Member
+      // ------------------------------------------------------
+      await visit('Create Multi-Role Member', async () => {
+        multiRoleMember = await admin.team.createMember({
+          roles: ['General Manager', 'Marketing Manager', 'Order Management Lead'],
+        });
 
-        await visit(
-          `Create Member (${role})`,
-          async () => {
-            member = await admin.team.createMember({
-              role,
-            });
+        await admin.team.searchMember(multiRoleMember.name);
+        await admin.team.expectMemberVisible(multiRoleMember.name);
+      });
 
-            await admin.team.searchMember(member.name);
-            await admin.team.expectMemberVisible(member.name);
-          },
-        );
+      // ------------------------------------------------------
+      // 2. Deactivate Multi-Role Member
+      // ------------------------------------------------------
+      await visit('Deactivate Multi-Role Member', async () => {
+        if (!multiRoleMember) {
+          throw new Error('Skipped — multi-role member was never created.');
+        }
 
-        // ------------------------------------------------------
-        // Deactivate Member
-        // ------------------------------------------------------
+        await admin.team.setStatus(multiRoleMember.name, 'Inactive');
 
-        await visit(
-          `Deactivate Member (${role})`,
-          async () => {
-            if (!member) {
-              throw new Error(
-                'Skipped — member was never created.',
-              );
-            }
+        /*
+         * The member is now Inactive, switch filter to verify
+         */
+        await admin.team.filterByStatus('Inactive');
+        await admin.team.searchMember(multiRoleMember.name);
+        await admin.team.expectMemberVisible(multiRoleMember.name);
+      });
 
-            await admin.team.setStatus(
-              member.name,
-              'Inactive',
-            );
+      // ------------------------------------------------------
+      // 3. Delete Multi-Role Member
+      // ------------------------------------------------------
+      await visit('Delete Multi-Role Member', async () => {
+        if (!multiRoleMember) {
+          throw new Error('Skipped — multi-role member was never created.');
+        }
 
-            /*
-             * The member is no longer in the Active list,
-             * so switch to Inactive before verifying it.
-             */
-            await admin.team.filterByStatus('Inactive');
+        await admin.team.deleteMember(multiRoleMember.name);
+        await admin.team.expectMemberGone(multiRoleMember.name);
 
-            await admin.team.searchMember(member.name);
-            await admin.team.expectMemberVisible(member.name);
-          },
-        );
+        /*
+         * Reset the status filter back to Active
+         */
+        await admin.team.filterByStatus('Active');
+      });
 
-        // ------------------------------------------------------
-        // Delete Member
-        // ------------------------------------------------------
+      // ------------------------------------------------------
+      // 4. Standalone Super Admin Member (Exclusive Access)
+      // ------------------------------------------------------
+      await visit('Create Super Admin Member', async () => {
+        const saMember = await admin.team.createMember({
+          roles: ['Super Admin'],
+        });
 
-        await visit(
-          `Delete Member (${role})`,
-          async () => {
-            if (!member) {
-              throw new Error(
-                'Skipped — member was never created.',
-              );
-            }
+        await admin.team.searchMember(saMember.name);
+        await admin.team.expectMemberVisible(saMember.name);
 
-            /*
-             * deleteMember() handles:
-             * - searching
-             * - opening the 3-dot menu
-             * - deleting
-             * - confirming
-             * - clearing the search
-             */
-            await admin.team.deleteMember(member.name);
-
-            await admin.team.expectMemberGone(member.name);
-
-            /*
-             * Reset the status filter before moving
-             * to the next Team role.
-             */
-            await admin.team.filterByStatus('Active');
-          },
-        );
-      }
+        await admin.team.deleteMember(saMember.name);
+        await admin.team.expectMemberGone(saMember.name);
+      });
     });
 
 //     // ==========================================================
